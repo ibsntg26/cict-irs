@@ -5,6 +5,6 @@ from . import viewsets
 
 app_name = 'base'
 router = DefaultRouter()
-router.register(r'event', viewsets.EventViewSet, basename='event')
-router.register(r'news', viewsets.NewsViewSet, basename='news')
+# router.register(r'event', viewsets.EventViewSet, basename='event')
+# router.register(r'news', viewsets.NewsViewSet, basename='news')
 urlpatterns = router.urls
