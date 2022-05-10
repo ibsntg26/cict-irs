@@ -6,11 +6,11 @@ class Incident(models.Model):
     student_id = models.CharField(_('student'), max_length=100)
     report_type = models.CharField(_('report type'), max_length=255)
     type_others = models.CharField(_('type others'), max_length=255, null=True, blank=True)
-    evaluator_id = models.CharField(_('evaluator'), max_length=100)
+    evaluator_id = models.CharField(_('evaluator'), max_length=100, null=True, blank=True)
     message = models.TextField(_('message'))
     details = models.CharField(_('details'), max_length=255, null=True, blank=True)
     attachment = models.FileField(_('attachment'), upload_to='ticket-attachment/', blank=True, null=True)
-    status = models.CharField(_('status'), max_length=20)
+    status = models.CharField(_('status'), max_length=20, default='Open')
     date_created = models.DateTimeField(_('date created'), auto_now_add=True)
     date_updated = models.DateTimeField(_('date updated'), auto_now=True)
     date_completed = models.DateTimeField(_('date completed'), null=True, blank=True)
@@ -18,7 +18,7 @@ class Incident(models.Model):
     object = models.DjongoManager()
 
     def __str__(self):
-        return str(self.report_type)
+        return f'{self.report_type} | #{self.id}'
     class Meta:
         db_table = 'incident'
 
@@ -39,6 +39,7 @@ class Followup(models.Model):
 class Notification(models.Model):
     incident = models.ForeignKey(Incident, related_name='incident_notif', on_delete=models.CASCADE)
     user_id = models.CharField(_('user'), max_length=100)
+    subject = models.CharField(_('subject'), max_length=100)
     message = models.TextField(_('message'))
     is_read = models.BooleanField(default=False)
     date_created = models.DateTimeField(_('date created'), auto_now_add=True)
