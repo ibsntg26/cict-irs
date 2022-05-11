@@ -14,7 +14,16 @@ class IncidentViewSet(viewsets.ViewSet):
     serializer_class = NewIncidentSerializer
 
     def list(self, request):
-        serializer = IncidentSerializer(self.queryset, many=True)
+        student = request.GET.get('student')
+        evaluator = request.GET.get('evaluator')
+        incidents = self.queryset
+
+        if student is not None:
+            serializer = IncidentSerializer(incidents.filter(student_id=student), many=True)
+        elif evaluator is not None:
+            serializer = IncidentSerializer(incidents.filter(evaluator_id=evaluator), many=True)
+        else:
+            serializer = IncidentSerializer(incidents, many=True)
         return Response(serializer.data)
 
     def create(self, request):
@@ -35,13 +44,30 @@ class IncidentViewSet(viewsets.ViewSet):
         serializer = IncidentSerializer(incident, many=False)
         return Response(serializer.data)
 
+    def partial_update(self, request, pk=None):
+        incident = get_object_or_404(self.queryset, pk=pk)
+        data = request.data
+
+        try:
+            evaluator = data['evaluator_id']
+            incident.evaluator_id = evaluator
+            incident.save()
+        except Exception:
+            return Response({'success': False}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'success': True})
+
 class FollowupViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
     queryset = Followup.object.all()
     serializer_class = FollowupSerializer
 
     def list(self, request):
-        serializer = self.serializer_class(self.queryset, many=True)
+        incident = request.GET.get('incident')
+
+        if incident is not None:
+            serializer = self.serializer_class(self.queryset.filter(incident_id=incident))
+        else:
+            serializer = self.serializer_class(self.queryset, many=True)
         return Response(serializer.data)
 
     def create(self, request):
