@@ -47,13 +47,19 @@ class IncidentViewSet(viewsets.ViewSet):
     def partial_update(self, request, pk=None):
         incident = get_object_or_404(self.queryset, pk=pk)
         data = request.data
+        action = data['action']
 
-        try:
-            evaluator = data['evaluator_id']
-            incident.evaluator_id = evaluator
+        if action == 'process':
+            try:
+                evaluator = data['evaluator_id']
+                incident.evaluator_id = evaluator
+                incident.status = 'In Progress'
+                incident.save()
+            except Exception:
+                return Response({'success': False}, status=status.HTTP_400_BAD_REQUEST)
+        elif action == 'close':
+            incident.status = 'Resolved'
             incident.save()
-        except Exception:
-            return Response({'success': False}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'success': True})
 
 class FollowupViewSet(viewsets.ViewSet):
