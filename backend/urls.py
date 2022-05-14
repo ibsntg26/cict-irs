@@ -18,10 +18,15 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from rest_framework_simplejwt.views import TokenRefreshView
+from base.api.viewsets import AuthTokenViewSet
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('base.api.urls')),
+    path('api/token/', AuthTokenViewSet.as_view(), name='auth-token'),
+    path('api/token/refresh', TokenRefreshView.as_view(), name='refresh-token'),
 ]
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

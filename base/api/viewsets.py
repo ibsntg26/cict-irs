@@ -4,13 +4,64 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework import status
 from rest_framework import viewsets
-from .serializers import IncidentSerializer, NewIncidentSerializer, FollowupSerializer, NotificationSerializer
-from base.models import Incident, Followup, Notification
+from .serializers import *
+from base.models import Evaluator, Student, Incident, Notification
+from rest_framework_simplejwt.views import TokenObtainPairView
 
+class AuthTokenViewSet(TokenObtainPairView):
+    serializer_class = TokenSerializer
+
+# need update, archive
+class EvaluatorViewSet(viewsets.ViewSet):
+    permissions_classes = [AllowAny]
+    queryset = Evaluator.objects.all()
+    serializer_class = NewEvaluatorSerializer
+
+    def list(self, request):
+        serializer = EvaluatorInfoSerializer(self.queryset, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    # def update(self, request, pk=None):
+    #     pass
+
+    def retrieve(self, request, pk=None):
+        evaluator = get_object_or_404(self.queryset, pk=pk)
+        serializer = EvaluatorInfoSerializer(evaluator, many=False)
+        return Response(serializer.data)
+
+# need update, archive
+class StudentViewSet(viewsets.ViewSet):
+    permissions_classes = [AllowAny]
+    queryset = Student.objects.all()
+    serializer_class = NewStudentSerializer
+
+    def list(self, request):
+        serializer = StudentInfoSerializer(self.queryset, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    # def update(self, request, pk=None):
+    #     pass
+
+    def retrieve(self, request, pk=None):
+        student = get_object_or_404(self.queryset, pk=pk)
+        serializer = StudentInfoSerializer(student, many=False)
+        return Response(serializer.data)
 
 class IncidentViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
-    queryset = Incident.object.all()
+    queryset = Incident.objects.all()
     serializer_class = NewIncidentSerializer
 
     def list(self, request):
@@ -29,14 +80,15 @@ class IncidentViewSet(viewsets.ViewSet):
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        incident = serializer.save()
 
-        # Notification.objects.create(
-        #     incident=incident,
-        #     user_id = incident.user_id,
-        #     subject = incident.report_type,
-        #     message = ''
-        # )
+        Notification.objects.create(
+            incident=incident,
+            user = incident.student.user,
+            subject = 'Incident Submitted!',
+            message = 'Message goes here.'
+        )
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, pk=None):
@@ -44,34 +96,34 @@ class IncidentViewSet(viewsets.ViewSet):
         serializer = IncidentSerializer(incident, many=False)
         return Response(serializer.data)
 
-    def partial_update(self, request, pk=None):
-        incident = get_object_or_404(self.queryset, pk=pk)
-        data = request.data
-        action = data['action']
+    # def partial_update(self, request, pk=None):
+    #     incident = get_object_or_404(self.queryset, pk=pk)
+    #     data = request.data
+    #     action = data['action']
 
-        if action == 'process':
-            try:
-                evaluator = data['evaluator_id']
-                incident.evaluator_id = evaluator
-                incident.status = 'In Progress'
-                incident.save()
-            except Exception:
-                return Response({'success': False}, status=status.HTTP_400_BAD_REQUEST)
-        elif action == 'close':
-            incident.status = 'Resolved'
-            incident.save()
-        return Response({'success': True})
+    #     if action == 'process':
+    #         try:
+    #             evaluator = data['evaluator_id']
+    #             incident.evaluator_id = evaluator
+    #             incident.status = 'In Progress'
+    #             incident.save()
+    #         except Exception:
+    #             return Response({'success': False}, status=status.HTTP_400_BAD_REQUEST)
+    #     elif action == 'close':
+    #         incident.status = 'Resolved'
+    #         incident.save()
+    #     return Response({'success': True})
 
 class FollowupViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
-    queryset = Followup.object.all()
+    queryset = Followup.objects.all()
     serializer_class = FollowupSerializer
 
     def list(self, request):
         incident = request.GET.get('incident')
 
         if incident is not None:
-            serializer = self.serializer_class(self.queryset.filter(incident_id=incident))
+            serializer = self.serializer_class(self.queryset.filter(incident_id=incident), many=True)
         else:
             serializer = self.serializer_class(self.queryset, many=True)
         return Response(serializer.data)
@@ -83,9 +135,9 @@ class FollowupViewSet(viewsets.ViewSet):
 
         # Notification.objects.create(
         #     incident=followup,
-        #     user_id = incident.user_id,
-        #     subject = incident.report_type,
-        #     message = ''
+        #     user = followup.student.user,
+        #     subject = 'Feedback Received',
+        #     message = 'Message goes here.'
         # )
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -97,11 +149,17 @@ class FollowupViewSet(viewsets.ViewSet):
 
 class NotificationViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
-    queryset = Notification.object.all()
+    queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
 
     def list(self, request):
-        serializer = self.serializer_class(self.queryset, many=True)
+        user = request.GET.get('user')
+        notifications = self.queryset
+
+        if user is not None:
+            serializer = self.serializer_class(notifications.filter(user_id=user), many=True)
+        else:
+            serializer = self.serializer_class(notifications, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
