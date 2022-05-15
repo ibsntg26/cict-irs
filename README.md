@@ -15,6 +15,10 @@
 ---
 
 #### **API ENDPOINTS:**
+- http://127.0.0.1:8000/api/user/
+    - GET request returns all user
+    - GET request with parameter id (ex. /student/1 ) returns an instance
+
 - http://127.0.0.1:8000/api/student/
     - GET request returns all student
     - GET request with parameter id (ex. /student/2018123456 ) returns an instance
