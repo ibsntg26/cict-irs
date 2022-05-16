@@ -79,7 +79,6 @@ class NewEvaluatorSerializer(ModelSerializer):
 class NewStudentSerializer(ModelSerializer):
     student = StudentSerializer()
     password = serializers.CharField(min_length=8, write_only=True)
-    picture = serializers.ImageField(allow_empty_file=True, allow_null=True)
 
     def validate(self, attrs):
         email = attrs.get('email')
@@ -92,18 +91,13 @@ class NewStudentSerializer(ModelSerializer):
 
     def create(self, validated_data):
         data = validated_data.pop('student')
-        picture = validated_data['picture']
-
-        if picture is None:
-            validated_data.pop('picture')
-
         user = CustomUser.objects.create_user(**validated_data)
         Student.objects.create(user=user, **data)
         return user
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'password', 'picture', 'last_name', 'first_name', 'middle_initial', 'mobile_number', 'student']
+        fields = ['email', 'password', 'last_name', 'first_name', 'middle_initial', 'mobile_number', 'student']
 
 class IncidentSerializer(ModelSerializer):
     class Meta:
