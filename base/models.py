@@ -68,7 +68,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 class Evaluator(models.Model):
     employee_number = models.IntegerField(_('employee number'), primary_key=True, unique=True)
     position = models.CharField(_('position'), max_length=100)
-    residential_address = models.CharField(_('residential address'), max_length=255)
+    residential_address = models.CharField(_('residential address'), max_length=255, null=True, blank=True)
     user = models.OneToOneField(CustomUser, related_name='evaluator', on_delete=models.CASCADE)
 
     # object = models.DjongoManager()
