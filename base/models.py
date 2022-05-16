@@ -82,8 +82,8 @@ class Student(models.Model):
     student_number = models.IntegerField(_('student number'), primary_key=True, unique=True)
     year_level = models.CharField(_('year level'), max_length=10)
     section = models.CharField(_('section'), max_length=10)
-    residential_address = models.CharField(_('residential address'), max_length=255)
-    permanent_address = models.CharField(_('permanent address'), max_length=255)
+    residential_address = models.CharField(_('residential address'), max_length=255, null=True, blank=True)
+    permanent_address = models.CharField(_('permanent address'), max_length=255, null=True, blank=True)
     user = models.OneToOneField(CustomUser, related_name='student', on_delete=models.CASCADE)
 
     # object = models.DjongoManager()
