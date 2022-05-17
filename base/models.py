@@ -98,10 +98,10 @@ class Student(models.Model):
 class Incident(models.Model):
     student = models.ForeignKey(Student, related_name='student', on_delete=models.CASCADE)
     report_type = models.CharField(_('report type'), max_length=255)
-    type_others = models.CharField(_('type others'), max_length=255, null=True, blank=True)
+    report_title = models.CharField(_('report title'), max_length=255, null=True, blank=True)
     evaluator = models.ForeignKey(Evaluator, related_name='evaluator', on_delete=models.CASCADE, null=True, blank=True)
-    message = models.TextField(_('message'))
-    details = models.CharField(_('details'), max_length=255, null=True, blank=True)
+    report_details = models.TextField(_('report details'), null=True, blank=True)
+    subject_add = models.CharField(_('subject add'), max_length=255, null=True, blank=True)
     file = models.FileField(_('file'), upload_to='files/', blank=True, null=True)
     status = models.CharField(_('status'), max_length=20, default='Open')
     date_created = models.DateTimeField(_('date created'), auto_now_add=True)

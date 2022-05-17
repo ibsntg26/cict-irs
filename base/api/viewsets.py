@@ -1,3 +1,4 @@
+from hashlib import new
 from django import views
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -93,7 +94,11 @@ class IncidentViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-        serializer = self.serializer_class(data=request.data)
+        student = Student.objects.get(user=request.user)
+        new_data = request.data.copy()
+        new_data.update({'student':student.student_number})
+
+        serializer = self.serializer_class(data=new_data)
         serializer.is_valid(raise_exception=True)
         incident = serializer.save()
 
@@ -101,7 +106,7 @@ class IncidentViewSet(viewsets.ViewSet):
             incident=incident,
             user = incident.student.user,
             subject = 'Incident Submitted!',
-            message = 'Message goes here.'
+            message = ''
         )
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
