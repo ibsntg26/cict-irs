@@ -29,11 +29,12 @@ http://127.0.0.1:8000/api/evaluator/
     - GET request with parameter id (ex. /evaluator/2018123456 ) returns an instance
     - POST request creates new incidents
 
-- http://127.0.0.1:8000/api/incident/
+- http://127.0.0.1:8000/api/incident/all/
     - GET request returns all incident
-    - GET request with parameter student (ex. /incident/?student=1) returns all incident of that student
-    - GET request with parameter evaluator (ex. /incident/?evaluator=1) returns all incident of that evaluator
     - GET request with parameter id (ex. /incident/1 ) returns an instance
+
+- http://127.0.0.1:8000/api/incident/student/
+    - GET request returns all incident of logged student
     - POST request creates new incidents
     - PATCH request for processing/closing incidents
     

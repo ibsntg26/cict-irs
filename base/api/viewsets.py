@@ -75,25 +75,29 @@ class StudentViewSet(viewsets.ViewSet):
         serializer = StudentInfoSerializer(student, many=False)
         return Response(serializer.data)
 
-class IncidentViewSet(viewsets.ViewSet):
+class AllIncidentViewset(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+    queryset = Incident.objects.all()
+    serializer_class = IncidentSerializer
+
+    def list(self, request):
+        serializer = self.serializer_class(self.queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        incident = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.serializer_class(incident, many=False)
+        return Response(serializer.data)
+
+class StudentIncidentViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
     queryset = Incident.objects.all()
     serializer_class = NewIncidentSerializer
 
     def list(self, request):
         student = Student.objects.get(user=request.user)
-        incidents = self.get_queryset.filter(student=student)
+        incidents = self.queryset.filter(student=student)
         serializer = IncidentSerializer(incidents, many=True)
-        # student = request.GET.get('student')
-        # evaluator = request.GET.get('evaluator')
-        # incidents = self.queryset
-
-        # if student is not None:
-        #     serializer = IncidentSerializer(incidents.filter(student_id=student), many=True)
-        # elif evaluator is not None:
-        #     serializer = IncidentSerializer(incidents.filter(evaluator_id=evaluator), many=True)
-        # else:
-        #     serializer = IncidentSerializer(incidents, many=True)
         return Response(serializer.data)
 
     def create(self, request):

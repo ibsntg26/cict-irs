@@ -37,6 +37,17 @@ class StudentInfoSerializer(ModelSerializer):
         model = Student
         fields = '__all__'
 
+class UserIncidentInfoSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name']
+
+class StudentIncidentInfoSerializer(ModelSerializer):
+    user = UserIncidentInfoSerializer()
+    class Meta:
+        model = Student
+        fields = ['user', 'student_number', 'section', 'year_level']
+
 class EvaluatorSerializer(ModelSerializer):
     class Meta:
         model = Evaluator
@@ -100,6 +111,7 @@ class NewStudentSerializer(ModelSerializer):
         fields = ['email', 'password', 'last_name', 'first_name', 'middle_initial', 'mobile_number', 'student']
 
 class IncidentSerializer(ModelSerializer):
+    student = StudentIncidentInfoSerializer()
     class Meta:
         model = Incident
         fields = '__all__'
