@@ -89,6 +89,22 @@ class AllIncidentViewset(viewsets.ViewSet):
         serializer = self.serializer_class(incident, many=False)
         return Response(serializer.data)
 
+class EvaluatorIncidentViewSet(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+    queryset = Incident.objects.all()
+    serializer_class = IncidentSerializer
+
+    def list(self, request):
+        evaluator = Evaluator.objects.get(user=request.user)
+        incidents = self.queryset.filter(evaluator=evaluator)
+        serializer = self.serializer_class(incidents, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        incident = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.serializer_class(incident, many=False)
+        return Response(serializer.data)
+
 class StudentIncidentViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
     queryset = Incident.objects.all()
