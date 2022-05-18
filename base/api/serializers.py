@@ -48,6 +48,12 @@ class StudentIncidentInfoSerializer(ModelSerializer):
         model = Student
         fields = ['user', 'student_number', 'section', 'year_level']
 
+class EvaluatorIncidentInfoSerializer(ModelSerializer):
+    user = UserIncidentInfoSerializer()
+    class Meta:
+        model = Evaluator
+        fields = ['user', 'employee_number']
+
 class EvaluatorSerializer(ModelSerializer):
     class Meta:
         model = Evaluator
@@ -112,6 +118,7 @@ class NewStudentSerializer(ModelSerializer):
 
 class IncidentSerializer(ModelSerializer):
     student = StudentIncidentInfoSerializer()
+    evaluator = EvaluatorIncidentInfoSerializer()
     class Meta:
         model = Incident
         fields = '__all__'

@@ -1,5 +1,4 @@
-from hashlib import new
-from django import views
+from datetime import datetime
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
@@ -38,8 +37,11 @@ class EvaluatorViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-        serializer = self.serializer_class(data=request.data)
+        new_data = request.data.copy()
+        new_data['role'] = 2
+        serializer = self.serializer_class(data=new_data)
         serializer.is_valid(raise_exception=True)
+
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -81,7 +83,13 @@ class AllIncidentViewset(viewsets.ViewSet):
     serializer_class = IncidentSerializer
 
     def list(self, request):
-        serializer = self.serializer_class(self.queryset, many=True)
+        status = request.GET.get('status')
+        incidents = self.queryset
+
+        if status is not None:
+            incidents = incidents.filter(status__iexact=status)
+
+        serializer = self.serializer_class(incidents, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
@@ -96,7 +104,12 @@ class EvaluatorIncidentViewSet(viewsets.ViewSet):
 
     def list(self, request):
         evaluator = Evaluator.objects.get(user=request.user)
+        status = request.GET.get('status')
         incidents = self.queryset.filter(evaluator=evaluator)
+
+        if status is not None:
+            incidents = incidents.filter(status__iexact=status)
+
         serializer = self.serializer_class(incidents, many=True)
         return Response(serializer.data)
 
@@ -112,7 +125,12 @@ class StudentIncidentViewSet(viewsets.ViewSet):
 
     def list(self, request):
         student = Student.objects.get(user=request.user)
+        status = request.GET.get('status')
         incidents = self.queryset.filter(student=student)
+
+        if status is not None:
+            incidents = incidents.filter(status__iexact=status)
+
         serializer = IncidentSerializer(incidents, many=True)
         return Response(serializer.data)
 
@@ -172,16 +190,27 @@ class FollowupViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        followup = serializer.save()
+        res = int(request.GET.get('res'))
+        res_flag = res == 1 if True else False
+        user = request.user
+        incident = Incident.objects.get(id=int(request.data['incident']))
 
-        # Notification.objects.create(
-        #     incident=followup,
-        #     user = followup.student.user,
-        #     subject = 'Feedback Received',
-        #     message = 'Message goes here.'
-        # )
+        incident.status = 'Resolved'
+        # incident.date_completed = datetime.now()
+        incident.save()
+
+        new_data = request.data.copy()
+        new_data.update({'user':user.id, 'is_solution':res_flag})
+        serializer = self.serializer_class(data=new_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        Notification.objects.create(
+            incident=incident,
+            user = incident.student.user ,
+            subject = 'Feedback Received',
+            message = ''
+        )
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -230,6 +259,11 @@ class EventViewSet(viewsets.ViewSet):
         serializer = EventSerializer(event, many=False)
         return Response(serializer.data)
 
+    def destroy(self, request, pk=None):
+        event = get_object_or_404(self.queryset, pk=pk)
+        event.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 class NewsViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
     queryset = News.objects.all()
@@ -249,3 +283,8 @@ class NewsViewSet(viewsets.ViewSet):
         news = get_object_or_404(self.queryset, pk=pk)
         serializer = self.serializer_class(news, many=False)
         return Response(serializer.data)
+
+    def destroy(self, request, pk=None):
+        news = get_object_or_404(self.queryset, pk=pk)
+        news.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -31,28 +31,42 @@ http://127.0.0.1:8000/api/evaluator/
 
 - http://127.0.0.1:8000/api/incident/all/
     - GET request returns all incident
+    - GET request with parameter status (ex. /all?status=open ) filters incident by status
     - GET request with parameter id (ex. /incident/1 ) returns an instance
 
 - http://127.0.0.1:8000/api/incident/student/
     - GET request returns all incident of logged student
+    - GET request with parameter status (ex. /student?status=open ) filters incident by status
     - GET request with parameter id (ex. /incident/1 ) returns an instance
     - POST request creates new incidents
     - PATCH request for processing/closing incidents
     
 - http://127.0.0.1:8000/api/incident/evaluator/
     - GET request returns all incident of logged evaluator
+    - GET request with parameter status (ex. /evaluator?status=open ) filters incident by status
     - GET request with parameter id (ex. /incident/1 ) returns an instance
     - PATCH request for processing/closing incidents
 
 - http://127.0.0.1:8000/api/followup/
     - GET request returns all followups
     - GET request with parameter id (ex. /followup/1 ) returns an instance
-    - POST request creates new followup
+    - POST request with parameter res (ex. /followup/?res=1) creates new followup
 
 - http://127.0.0.1:8000/api/notification/
     - GET request returns all notifications
     - GET request with parameter user (ex. /incident/?user=1) returns all notification of that user
-    - GET request with parameter id (ex. /notification/1 ) returns an instance
+    - GET request with parameter id (ex. /notification/1) returns an instance
+
+- http://127.0.0.1:8000/api/event/
+    - GET request returns all events
+    - GET request with parameter id (ex. /event/1) returns an instance
+    - DELETE request with parameter id (ex. /event/1) deletes an instance
+
+- http://127.0.0.1:8000/api/news/
+    - GET request returns all news
+    - GET request with parameter id (ex. /news/1) returns an instance
+    - DELETE request with parameter id (ex. /news/1) deletes an instance
+
 ---
 
 #### **SIDENOTES:**
