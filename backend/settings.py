@@ -38,10 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'user',
     'base',
     'rest_framework',
-    'rest_framework_simplejwt',
     'corsheaders',
 ]
 
@@ -63,25 +61,24 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
+    )
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': False,
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': True,
 
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,
     'AUDIENCE': None,
     'ISSUER': None,
     'JWK_URL': None,
     'LEEWAY': 0,
 
-    'AUTH_HEADER_TYPES': ('JWT',),
+    'AUTH_HEADER_TYPES': ('Bearer', 'JWT'),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
@@ -95,8 +92,10 @@ SIMPLE_JWT = {
 
     'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=15),
 }
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -121,7 +120,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -129,50 +128,24 @@ DATABASES = {
     }
 }
 
-
-
-'''
-DATABASES = {
-"default": {
-    "ENGINE": "djongo",
-    "CLIENT": {
-        "host": "mongodb+srv://cict-irs:irs-password@irs-cluster0.jvym1.mongodb.net/irs-django-db?retryWrites=true&w=majority",
-        "username": "cict-irs",
-        "password": "irs-password",
-        "name": "irs-django-db",
-    },
-    "ENFORCE_SCHEMA": False
-}}
-
-'''
 '''
 DATABASES = {
         'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'irs-django-db',
-        'HOST': 'mongodb+srv://cict-irs:<password>@irs-cluster0.jvym1.mongodb.net/irs-django-db?retryWrites=true&w=majority',
-        'USER': 'cict-irs',
-        'PASSWORD': '<db password>',
-    }
-}
-'''
-'''
-DATABASES = {
-        'default': {
-        'ENGINE': 'djongo',
-        'NAME': '<db name>',
-        'HOST': 'mongodb+srv://<db username>:<db password>@....mongodb.net/test?retryWrites=true',
-        'USER': '<db username>',
-        'PASSWORD': '<db password>',
-    }
+            'ENGINE': 'djongo',
+            'NAME': 'irs-db',
+            'ENFORCE_SCHEMA': False,
+            'CLIENT': {
+                'host': 'mongodb+srv://cict-irs:irs-password@irs-cluster0.jvym1.mongodb.net/irs-db?retryWrites=true&w=majority'
+            }  
+        }
 }
 
+
+'''
 https://www.mongodb.com/compatibility/mongodb-and-django
 https://stackoverflow.com/questions/55543699/how-to-connect-django-orm-to-mongo-atlas
-https://youtu.be/iKB_4HWKMCc
-https://youtu.be/FLZYLog369s
 
-https://youtu.be/I17uA1sVQ2g
+https://stackoverflow.com/questions/70185942/why-i-am-getting-not-implemented-error-database-objects-do-not-implement-truth
 '''
 
 
@@ -216,7 +189,7 @@ STATIC_ROOT = BASE_DIR / 'static'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-AUTH_USER_MODEL = 'user.CustomUser'
+AUTH_USER_MODEL = 'base.CustomUser'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

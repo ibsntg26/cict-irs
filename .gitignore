@@ -4,4 +4,5 @@
 /env
 
 # database
+/db copy.sqlite3
 /db.sqlite3
