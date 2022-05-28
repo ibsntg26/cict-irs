@@ -237,6 +237,14 @@ class FollowupViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(followup, many=False)
         return Response(serializer.data)
 
+    @action(detail=False)
+    def get_student_latest(self, request, pk=None):
+        student = Student.objects.get(user=request.user)
+        incident = Incident.objects.filter(student=student)
+        latest_followup = Followup.objects.filter(incident__in=incident)
+        serializer = FollowupSerializer(latest_followup, many=True)
+        return Response(serializer.data)
+
 class NotificationViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
     queryset = Notification.objects.all()

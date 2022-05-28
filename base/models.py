@@ -122,6 +122,7 @@ class Followup(models.Model):
     message = models.TextField(_('message'))
     file = models.FileField(_('file'), upload_to='files/', blank=True, null=True)
     is_solution = models.BooleanField(default=False)
+    date_created = models.DateTimeField(_('date created'), auto_now_add=True)
 
     # object = models.DjongoManager()
 
@@ -129,6 +130,7 @@ class Followup(models.Model):
         return str(self.id)
     class Meta:
         db_table = 'incident_follow_up'
+        ordering = ['-date_created']
 
 class Notification(models.Model):
     incident = models.ForeignKey(Incident, related_name='incident_notif', on_delete=models.CASCADE)

@@ -17,7 +17,7 @@ class TokenSerializer(TokenObtainPairSerializer):
 
         if token['role'] == 1 or token['role'] == 2:
             token['employee_number'] = user.evaluator.employee_number
-        if token['role'] == 'student':
+        if token['role'] == 3:
             token['student_number'] = user.student.student_number
         return token
 
@@ -130,6 +130,7 @@ class NewIncidentSerializer(ModelSerializer):
         exclude = ['date_completed']
 
 class FollowupSerializer(ModelSerializer):
+    incident = IncidentSerializer()
     class Meta:
         model = Followup
         fields = '__all__'
