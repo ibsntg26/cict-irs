@@ -141,7 +141,6 @@ DATABASES = {
 }
 
 
-
 '''
 https://www.mongodb.com/compatibility/mongodb-and-django
 https://stackoverflow.com/questions/55543699/how-to-connect-django-orm-to-mongo-atlas

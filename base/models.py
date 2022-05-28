@@ -114,6 +114,7 @@ class Incident(models.Model):
         return f'{self.report_type} | #{self.id}'
     class Meta:
         db_table = 'incident'
+        # ordering = ['-date_created']
 
 class Followup(models.Model):
     incident = models.ForeignKey(Incident, related_name='incident_followup', on_delete=models.CASCADE)
@@ -143,6 +144,7 @@ class Notification(models.Model):
         return str(self.id)
     class Meta:
         db_table = 'notification'
+        ordering = ['-date_created']
 
 
 class News(models.Model):

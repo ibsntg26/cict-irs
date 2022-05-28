@@ -13,6 +13,7 @@ class TokenSerializer(TokenObtainPairSerializer):
         token['email'] = user.email
         token['name'] = f'{user.first_name} {user.last_name}'
         token['role'] = user.role
+        token['picture'] = user.picture.url
 
         if token['role'] == 1 or token['role'] == 2:
             token['employee_number'] = user.evaluator.employee_number
@@ -103,7 +104,7 @@ class NewStudentSerializer(ModelSerializer):
         valid_domains = ['bulsu.edu.ph', 'bulsumain.onmicrosoft.com']
 
         if domain not in valid_domains :
-            raise serializers.ValidationError({'email': 'email must be a valid BulSU email.'})
+            raise serializers.ValidationError({'email': 'Email must be a BulSU email.'})
         return attrs
 
     def create(self, validated_data):

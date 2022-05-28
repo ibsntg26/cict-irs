@@ -7,6 +7,7 @@ from rest_framework import viewsets
 from .serializers import *
 from base.models import CustomUser, Evaluator, Student, Incident, Notification
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.decorators import action
 
 class AuthTokenViewSet(TokenObtainPairView):
     serializer_class = TokenSerializer
@@ -125,6 +126,7 @@ class StudentIncidentViewSet(viewsets.ViewSet):
 
     def list(self, request):
         student = Student.objects.get(user=request.user)
+        # student = Student.objects.get(student_number=2018101482)
         status = request.GET.get('status')
         incidents = self.queryset.filter(student=student)
 
@@ -154,6 +156,22 @@ class StudentIncidentViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         incident = get_object_or_404(self.queryset, pk=pk)
+        serializer = IncidentSerializer(incident, many=False)
+        return Response(serializer.data)
+
+    @action(detail=False)
+    def get_latest(self, request, pk=None):
+        student = Student.objects.get(user=request.user)
+        incident = self.queryset.filter(student=student).last()
+        serializer = IncidentSerializer(incident, many=False)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['patch'])
+    def close_latest(self, request, pk=None):
+        student = Student.objects.get(user=request.user)
+        incident = self.queryset.filter(student=student).last()
+        incident.status = 'Resolved'
+        incident.save()
         serializer = IncidentSerializer(incident, many=False)
         return Response(serializer.data)
 
