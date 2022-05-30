@@ -116,6 +116,13 @@ class Incident(models.Model):
         db_table = 'incident'
         # ordering = ['-date_created']
 
+class ForwardIncident(models.Model):
+    sender = models.ForeignKey(Evaluator, related_name="sender", on_delete=models.SET_NULL, null=True, blank=True)
+    receiver = models.ForeignKey(Evaluator, related_name="receiver", on_delete=models.SET_NULL, null=True, blank=True)
+    incident = models.ForeignKey(Incident, related_name='incident_forward', on_delete=models.CASCADE)
+    message = models.TextField(_('message'), null=True, blank=True)
+    date_created = models.DateTimeField(_('date created'), auto_now_add=True)
+
 class Followup(models.Model):
     incident = models.ForeignKey(Incident, related_name='incident_followup', on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, related_name='user_followup', on_delete=models.CASCADE)

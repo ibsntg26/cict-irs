@@ -1,4 +1,5 @@
 from datetime import datetime
+from django import views
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
@@ -119,6 +120,32 @@ class EvaluatorIncidentViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(incident, many=False)
         return Response(serializer.data)
 
+class ForwardIncidentViewSet(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+    queryset = ForwardIncident.objects.all()
+    serializer_class = ForwardIncidentSerializer
+
+    def list(self, request):
+        evaluator = Evaluator.objects.get(user=request.user)
+        filter = request.GET.get('filter')
+
+        if filter is not None:
+            if filter == 'to_me':
+                fw_incidents = self.queryset.filter(receiver=evaluator)
+            elif filter == 'to_admin':
+                fw_incidents = self.queryset.filter(sender=evaluator, receiver=Evaluator.objects.get(id=1))
+        else:
+            fw_incidents = self.queryset.filter(sender=evaluator)
+
+        serializer = self.serializer_class(fw_incidents, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        fw_incident = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.serializer_class(fw_incident, many=False)
+        return Response(serializer.data)
+
+
 class StudentIncidentViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
     queryset = Incident.objects.all()
@@ -196,52 +223,55 @@ class StudentIncidentViewSet(viewsets.ViewSet):
 class FollowupViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
     queryset = Followup.objects.all()
-    serializer_class = FollowupSerializer
+    serializer_class = NewFollowupSerializer
 
     def list(self, request):
         incident = request.GET.get('incident')
 
         if incident is not None:
-            serializer = self.serializer_class(self.queryset.filter(incident_id=incident), many=True)
+            serializer = FollowupSerializer(self.queryset.filter(incident_id=incident), many=True)
         else:
-            serializer = self.serializer_class(self.queryset, many=True)
+            serializer = FollowupSerializer(self.queryset, many=True)
         return Response(serializer.data)
 
     def create(self, request):
-        id = int(request.data['incident'])
+        incident_id =int(request.data['incident'])
         res = request.GET.get('res')
         res_flag = False
 
+        incident = Incident.objects.get(id=incident_id)
+
         if res is not None:
-            res = int(request.GET.get('res'))
+            res = int(res)
             res_flag = res == 1 if True else False
 
-        user = request.user
-
-        incident = Incident.objects.get(id=id)
         # incident.status = 'Resolved'
         # # incident.date_completed = datetime.now()
         # incident.save()
 
         new_data = request.data.copy()
-        new_data.update({'user':user.id, 'incident':incident, 'is_solution':res_flag})
+        new_data.update({'user':request.user.id, 'is_solution':res_flag})
         serializer = self.serializer_class(data=new_data)
         serializer.is_valid(raise_exception=True)
-        # serializer.save()
+        serializer.save()
+        
+        if  res == 1:
+            subject = 'Evaluator added solution to your incident.'
+        else:
+            subject =  'Evaluator replied to your incident.'
 
-        # Notification.objects.create(
-        #     incident=incident,
-        #     user = incident.student.user ,
-        #     subject = 'Evaluator replied to your incident.',
-        #     message = request.data['message']
-        # )
+        Notification.objects.create(
+            incident=incident,
+            user = incident.student.user ,
+            subject = subject,
+            message = request.data['message']
+        )
 
-        # return Response({'ewewe': 'ddsd'})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, pk=None):
         followup = get_object_or_404(self.queryset, pk=pk)
-        serializer = self.serializer_class(followup, many=False)
+        serializer = FollowupSerializer(followup, many=False)
         return Response(serializer.data)
 
     @action(detail=False)

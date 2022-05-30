@@ -129,8 +129,18 @@ class NewIncidentSerializer(ModelSerializer):
         model = Incident
         exclude = ['date_completed']
 
+class ForwardIncidentSerializer(ModelSerializer):
+    class Meta:
+        model = ForwardIncident
+        fields = '__all__'
+
 class FollowupSerializer(ModelSerializer):
     incident = IncidentSerializer()
+    class Meta:
+        model = Followup
+        fields = '__all__'
+
+class NewFollowupSerializer(ModelSerializer):
     class Meta:
         model = Followup
         fields = '__all__'
