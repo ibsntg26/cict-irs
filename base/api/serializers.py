@@ -130,6 +130,14 @@ class NewIncidentSerializer(ModelSerializer):
         exclude = ['date_completed']
 
 class ForwardIncidentSerializer(ModelSerializer):
+    incident = IncidentSerializer()
+    sender = EvaluatorIncidentInfoSerializer()
+    receiver = EvaluatorIncidentInfoSerializer()
+    class Meta:
+        model = ForwardIncident
+        fields = '__all__'
+
+class NewForwardIncidentSerializer(ModelSerializer):
     class Meta:
         model = ForwardIncident
         fields = '__all__'

@@ -133,7 +133,7 @@ class ForwardIncidentViewSet(viewsets.ViewSet):
             if filter == 'to_me':
                 fw_incidents = self.queryset.filter(receiver=evaluator)
             elif filter == 'to_admin':
-                fw_incidents = self.queryset.filter(sender=evaluator, receiver=Evaluator.objects.get(id=1))
+                fw_incidents = self.queryset.filter(sender=evaluator, receiver=Evaluator.objects.get(employee_number=1))
         else:
             fw_incidents = self.queryset.filter(sender=evaluator)
 
@@ -144,6 +144,29 @@ class ForwardIncidentViewSet(viewsets.ViewSet):
         fw_incident = get_object_or_404(self.queryset, pk=pk)
         serializer = self.serializer_class(fw_incident, many=False)
         return Response(serializer.data)
+
+    def create(self, request):
+        incident_id = int(request.data['incident'])
+        evaluator_from = Evaluator.objects.get(user=request.user)
+        evaluator_to = Evaluator.objects.get(employee_number=int(request.data['receiver']))
+
+        incident = Incident.objects.get(id=incident_id)
+
+        new_data = request.data.copy()
+        new_data.update({'sender':evaluator_from.employee_number, 'receiver':evaluator_to.employee_number})
+
+        serializer = NewForwardIncidentSerializer(data=new_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        Notification.objects.create(
+            incident=incident,
+            user = evaluator_to.user,
+            subject = 'Incident forwarded.',
+            message = ''
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class StudentIncidentViewSet(viewsets.ViewSet):
