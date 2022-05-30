@@ -41,7 +41,7 @@ class StudentInfoSerializer(ModelSerializer):
 class UserIncidentInfoSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name']
+        fields = ['picture', 'first_name', 'last_name', 'middle_initial', 'email', 'mobile_number']
 
 class StudentIncidentInfoSerializer(ModelSerializer):
     user = UserIncidentInfoSerializer()

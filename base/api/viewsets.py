@@ -208,28 +208,35 @@ class FollowupViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-        res = int(request.GET.get('res'))
-        res_flag = res == 1 if True else False
-        user = request.user
-        incident = Incident.objects.get(id=int(request.data['incident']))
+        id = int(request.data['incident'])
+        res = request.GET.get('res')
+        res_flag = False
 
-        incident.status = 'Resolved'
-        # incident.date_completed = datetime.now()
-        incident.save()
+        if res is not None:
+            res = int(request.GET.get('res'))
+            res_flag = res == 1 if True else False
+
+        user = request.user
+
+        incident = Incident.objects.get(id=id)
+        # incident.status = 'Resolved'
+        # # incident.date_completed = datetime.now()
+        # incident.save()
 
         new_data = request.data.copy()
-        new_data.update({'user':user.id, 'is_solution':res_flag})
+        new_data.update({'user':user.id, 'incident':incident, 'is_solution':res_flag})
         serializer = self.serializer_class(data=new_data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        # serializer.save()
 
-        Notification.objects.create(
-            incident=incident,
-            user = incident.student.user ,
-            subject = 'Feedback Received',
-            message = ''
-        )
+        # Notification.objects.create(
+        #     incident=incident,
+        #     user = incident.student.user ,
+        #     subject = 'Evaluator replied to your incident.',
+        #     message = request.data['message']
+        # )
 
+        # return Response({'ewewe': 'ddsd'})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, pk=None):
