@@ -17,7 +17,10 @@
 #### **API ENDPOINTS:**
 - http://127.0.0.1:8000/api/user/
     - GET request returns all user
-    - GET request with parameter id (ex. /student/1 ) returns an instance
+    - GET request with parameter id (ex. /user/1 ) returns an instance
+    - GET request with parameter id and suspend action (ex. /user/1/suspend ) archives user
+    - DELETE request with parameter id (ex. /user/1 ) deletes user
+
 
 - http://127.0.0.1:8000/api/student/
     - GET request returns all student

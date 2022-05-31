@@ -26,6 +26,18 @@ class UserViewSet(viewsets.ViewSet):
         user = get_object_or_404(self.queryset, pk=pk)
         serializer = UserSerializer(user, many=False)
         return Response(serializer.data)
+
+    def destroy(self, request, pk=None):
+        user = get_object_or_404(self.queryset, pk=pk)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True)
+    def suspend(self, request, pk=None):
+        user = get_object_or_404(self.queryset, pk=pk)
+        user.is_active = False
+        user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 # need update, archive
