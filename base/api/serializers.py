@@ -86,7 +86,7 @@ class NewEvaluatorSerializer(ModelSerializer):
         if picture is None:
             validated_data.pop('picture')
 
-        user = CustomUser.objects.create_user(**validated_data)
+        user = CustomUser.objects.create_evaluator(**validated_data)
         Evaluator.objects.create(user=user, **data)
         return user
 

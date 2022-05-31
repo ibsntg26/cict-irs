@@ -29,6 +29,16 @@ class CustomAccountManager(BaseUserManager):
         user.save()
         return user
 
+    def create_evaluator(self, email, password, **other_fields):
+        if not email:
+            raise ValueError(_('You must provide an email address'))
+
+        email = self.normalize_email(email)
+        user = self.model(email=email, role=2, **other_fields)
+        user.set_password(password)
+        user.save()
+        return user
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     ADMIN = 1
     EVALUATOR = 2
