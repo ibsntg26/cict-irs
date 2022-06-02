@@ -59,8 +59,12 @@ class EvaluatorViewSet(viewsets.ViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    # def update(self, request, pk=None):
-    #     pass
+    def partial_update(self, request, pk=None):
+        instance = get_object_or_404(self.queryset, pk=pk)
+        serializer = UpdateEvaluatorSerializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         evaluator = get_object_or_404(self.queryset, pk=pk)
@@ -83,8 +87,12 @@ class StudentViewSet(viewsets.ViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    # def update(self, request, pk=None):
-    #     pass
+    def partial_update(self, request, pk=None):
+        instance = get_object_or_404(self.queryset, pk=pk)
+        serializer = UpdateStudentSerializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         student = get_object_or_404(self.queryset, pk=pk)

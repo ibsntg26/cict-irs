@@ -117,6 +117,88 @@ class NewStudentSerializer(ModelSerializer):
         model = CustomUser
         fields = ['email', 'password', 'last_name', 'first_name', 'middle_initial', 'mobile_number', 'student']
 
+class UpdateEvaluatorSerializer(ModelSerializer):
+    email = serializers.EmailField(source='user.email')
+    first_name = serializers.CharField(source='user.first_name')
+    middle_initial = serializers.CharField(source='user.middle_initial')
+    last_name = serializers.CharField(source='user.last_name')
+    picture = serializers.ImageField(source='user.picture', allow_empty_file=True, allow_null=True)
+    mobile_number = serializers.CharField(source='user.mobile_number')
+
+    class Meta:
+        model = Evaluator
+        fields = ['email', 'first_name', 'middle_initial', 'last_name', 'picture', 'mobile_number', 'position', 'residential_address']
+
+    def validate(self, attrs):
+        new_email = attrs['user'].get('email')
+
+        if new_email is not None:
+            domain = new_email.split('@')[1]
+            valid_domains = ['bulsu.edu.ph', 'bulsumain.onmicrosoft.com']
+
+            if domain not in valid_domains :
+                raise serializers.ValidationError({'email': 'Email must be a BulSU email.'})
+        return attrs
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user')
+
+        instance.user.email = user_data.get('email', instance.user.email)
+        instance.user.first_name = user_data.get('first_name', instance.user.first_name)
+        instance.user.middle_initial = user_data.get('middle_initial', instance.user.middle_initial)
+        instance.user.last_name = user_data.get('last_name', instance.user.last_name)
+        if user_data.get('picture') is not None:
+            instance.user.picture = user_data.get('picture', instance.user.picture)
+        instance.user.mobile_number = user_data.get('mobile_number', instance.user.mobile_number)
+        instance.user.save()
+
+        instance.position = validated_data.get('position', instance.position)
+        instance.residential_address = validated_data.get('residential_address', instance.residential_address)
+        instance.save()
+        return instance
+
+class UpdateStudentSerializer(ModelSerializer):
+    email = serializers.EmailField(source='user.email')
+    first_name = serializers.CharField(source='user.first_name')
+    middle_initial = serializers.CharField(source='user.middle_initial')
+    last_name = serializers.CharField(source='user.last_name')
+    picture = serializers.ImageField(source='user.picture', allow_empty_file=True, allow_null=True)
+    mobile_number = serializers.CharField(source='user.mobile_number')
+
+    class Meta:
+        model = Student
+        fields = ['email', 'first_name', 'middle_initial', 'last_name', 'picture', 'mobile_number', 'year_level', 'section', 'residential_address', 'permanent_address']
+
+    def validate(self, attrs):
+        new_email = attrs['user'].get('email')
+
+        if new_email is not None:
+            domain = new_email.split('@')[1]
+            valid_domains = ['bulsu.edu.ph', 'bulsumain.onmicrosoft.com']
+
+            if domain not in valid_domains :
+                raise serializers.ValidationError({'email': 'Email must be a BulSU email.'})
+        return attrs
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user')
+
+        instance.user.email = user_data.get('email', instance.user.email)
+        instance.user.first_name = user_data.get('first_name', instance.user.first_name)
+        instance.user.middle_initial = user_data.get('middle_initial', instance.user.middle_initial)
+        instance.user.last_name = user_data.get('last_name', instance.user.last_name)
+        if user_data.get('picture') is not None:
+            instance.user.picture = user_data.get('picture', instance.user.picture)
+        instance.user.mobile_number = user_data.get('mobile_number', instance.user.mobile_number)
+        instance.user.save()
+
+        instance.year_level = validated_data.get('year_level', instance.year_level)
+        instance.section = validated_data.get('section', instance.section)
+        instance.residential_address = validated_data.get('residential_address', instance.residential_address)
+        instance.permanent_address = validated_data.get('permanent_address', instance.permanent_address)
+        instance.save()
+        return instance
+
 class IncidentSerializer(ModelSerializer):
     student = StudentIncidentInfoSerializer()
     evaluator = EvaluatorIncidentInfoSerializer()
