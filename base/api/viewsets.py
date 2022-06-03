@@ -109,13 +109,24 @@ class AllIncidentViewset(viewsets.ViewSet):
         incidents = self.queryset
 
         if status is not None:
-            incidents = incidents.filter(status__iexact=status)
-
+            incidents = Incident.objects.filter(status__iexact=status)
+        else:
+            incidents = Incident.objects.all()
         serializer = self.serializer_class(incidents, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         incident = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.serializer_class(incident, many=False)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['patch'])
+    def process_incident(self, request, pk=None):
+        evaluator = Evaluator.objects.get(user=request.user)
+        incident = get_object_or_404(self.queryset, pk=pk)
+        incident.evaluator = evaluator
+        incident.status = 'In Process'
+        incident.save()
         serializer = self.serializer_class(incident, many=False)
         return Response(serializer.data)
 
@@ -140,6 +151,15 @@ class EvaluatorIncidentViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(incident, many=False)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['patch'])
+    def close(self, request, pk=None):
+        incident = get_object_or_404(self.queryset, pk=pk)
+        incident.status = 'Resolved'
+        incident.date_completed = datetime.now()
+        incident.save()
+        serializer = IncidentSerializer(incident, many=False)
+        return Response(serializer.data)
+
 class ForwardIncidentViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
     queryset = ForwardIncident.objects.all()
@@ -155,7 +175,7 @@ class ForwardIncidentViewSet(viewsets.ViewSet):
             elif filter == 'to_admin':
                 fw_incidents = self.queryset.filter(sender=evaluator, receiver=Evaluator.objects.get(employee_number=1))
         else:
-            fw_incidents = self.queryset.filter(sender=evaluator)
+            fw_incidents = self.queryset.filter(sender=evaluator).exclude(receiver=Evaluator.objects.get(employee_number=1))
 
         serializer = self.serializer_class(fw_incidents, many=True)
         return Response(serializer.data)
@@ -171,6 +191,8 @@ class ForwardIncidentViewSet(viewsets.ViewSet):
         evaluator_to = Evaluator.objects.get(employee_number=int(request.data['receiver']))
 
         incident = Incident.objects.get(id=incident_id)
+        incident.evaluator = evaluator_to
+        incident.save()
 
         new_data = request.data.copy()
         new_data.update({'sender':evaluator_from.employee_number, 'receiver':evaluator_to.employee_number})
@@ -241,6 +263,7 @@ class StudentIncidentViewSet(viewsets.ViewSet):
         student = Student.objects.get(user=request.user)
         incident = self.queryset.filter(student=student).last()
         incident.status = 'Resolved'
+        incident.date_completed = datetime.now()
         incident.save()
         serializer = IncidentSerializer(incident, many=False)
         return Response(serializer.data)

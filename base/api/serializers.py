@@ -163,7 +163,7 @@ class UpdateStudentSerializer(ModelSerializer):
     middle_initial = serializers.CharField(source='user.middle_initial')
     last_name = serializers.CharField(source='user.last_name')
     picture = serializers.ImageField(source='user.picture', allow_empty_file=True, allow_null=True)
-    mobile_number = serializers.CharField(source='user.mobile_number')
+    mobile_number = serializers.CharField(source='user.mobile_number', allow_null=True)
 
     class Meta:
         model = Student
