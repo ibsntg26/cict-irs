@@ -343,9 +343,29 @@ class FollowupViewSet(viewsets.ViewSet):
     @action(detail=False)
     def get_student_latest(self, request, pk=None):
         student = Student.objects.get(user=request.user)
-        incident = Incident.objects.filter(student=student)
-        latest_followup = Followup.objects.filter(incident__in=incident)
-        serializer = FollowupSerializer(latest_followup, many=True)
+        student_incidents = Incident.objects.filter(student=student).order_by('-date_created')
+        followups = []
+
+        for student_incident in student_incidents:
+            latest_followup = Followup.objects.filter(incident=student_incident).first()
+            if latest_followup is not None:
+                followups.append(latest_followup)
+
+        serializer = FollowupSerializer(followups, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False)
+    def get_evaluator_latest(self, request, pk=None):
+        evaluator = Evaluator.objects.get(user=request.user)
+        evaluator_incidents = Incident.objects.filter(evaluator=evaluator).order_by('-date_created')
+        followups = []
+
+        for evaluator_incident in evaluator_incidents:
+            latest_followup = Followup.objects.filter(incident=evaluator_incident).first()
+            if latest_followup is not None:
+                followups.append(latest_followup)
+                
+        serializer = FollowupSerializer(followups, many=True)
         return Response(serializer.data)
 
 class NotificationViewSet(viewsets.ViewSet):

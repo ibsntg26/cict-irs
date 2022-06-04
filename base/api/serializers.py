@@ -225,6 +225,7 @@ class NewForwardIncidentSerializer(ModelSerializer):
         fields = '__all__'
 
 class FollowupSerializer(ModelSerializer):
+    user = UserIncidentInfoSerializer()
     incident = IncidentSerializer()
     class Meta:
         model = Followup
