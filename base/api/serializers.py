@@ -134,7 +134,7 @@ class UpdateEvaluatorSerializer(ModelSerializer):
 
         if new_email is not None:
             domain = new_email.split('@')[1]
-            valid_domains = ['bulsu.edu.ph', 'bulsumain.onmicrosoft.com']
+            valid_domains = ['bulsumain.onmicrosoft.com']
 
             if domain not in valid_domains :
                 raise serializers.ValidationError({'email': 'Email must be a BulSU email.'})
